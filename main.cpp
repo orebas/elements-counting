@@ -9,4 +9,6 @@ int main(){
   // std::cout << deck;
   for(auto x : deck)
     std::cout << x;
+  int dummy = 0;
+  std::cin >> dummy;
 }
