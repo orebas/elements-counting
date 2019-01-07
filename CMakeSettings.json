@@ -2,16 +2,23 @@
   "configurations": [
     {
       "name": "x64-Release",
-      "generator": "Ninja",
+      "generator": "Visual Studio 15 2017",
       "configurationType": "RelWithDebInfo",
       "inheritEnvironments": [
         "msvc_x64_x64"
       ],
       "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "-v",
-      "ctestCommandArgs": ""
+      "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE=C:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
+      "buildCommandArgs": " ",
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "C:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
+        }
+       
+      ]
     }
   ]
 }

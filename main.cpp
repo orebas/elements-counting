@@ -7,6 +7,7 @@
 #include <set>
 #include <stack>
 #include <array>
+#include <cstdio>
 
 #include <boost/variant.hpp>
 
@@ -70,7 +71,7 @@ void count_hand_possibilities() {
 						}
 
 	for (int j = 0; j < 17; j++)
-		std::cout << j << "\t" << sums[j] << std::endl;
+		std::cout << j << "\t" << sums[j] << "\n";
 }
 
 
@@ -130,23 +131,25 @@ int enumerate_games(const handpair& init) {
 	int player = 0;
 	int level = 0;
 	std::stack<move_type> m;
+	return 0;
 }
 
 
 int main(){
+  std::ios_base::sync_with_stdio(false);
   std::vector<int> deck = {1,1,2,2,3,3,4,4,5,5,6,6,6,6,6,6} ;
   // std::cout << deck;
   
   std::sort(deck.begin(), deck.end());
-  std::cout << "Here is the count of permutations" << std::endl;
+  std::cout << "Here is the count of permutations" << "\n";
   long long count =0;
   std::set< std::pair<std::vector<int>, std::vector<int> >> gameset;
   
   count_hand_possibilities();
   std::vector<handpair> gamelist;
-  std::cout << "Here is the count of initial games:  " << count_initial_games(gamelist) << std::endl;
+  std::cout << "Here is the count of initial games:  " << count_initial_games(gamelist) << "\n";
   for(auto x: gamelist) {
-	  std::cout << x.first << x.second << std::endl;
+	 // std::cout << x.first << x.second << "\n";
   }
   
   
@@ -160,17 +163,17 @@ int main(){
 do {
 	  count++;
 	  if (count % 1000000 == 0)
-		  std::cout << count / 1000000 << std::endl;
+		  std::cout << count / 1000000 << "\n";
 	  std::vector<int> hand1 = std::vector<int>(deck.begin(), deck.begin() + 6);
 	  std::vector<int>  hand2 = std::vector<int>(deck.begin()+6, deck.begin() +12);
-	  //std::cout << hand1 << std::endl;
-	  //std::cout << hand2 << std::endl;
+	  //std::cout << hand1 << "\n";
+	  //std::cout << hand2 << "\n";
 	  std::sort(hand1.begin(), hand1.end());
 	  std::sort(hand2.begin(), hand2.end());
 	  std::pair<std::vector<int>, std::vector<int> > handpair(hand1, hand2);
 	  gameset.insert(handpair);
 
 } while (std::next_permutation(deck.begin(), deck.end()));
-std::cout << count << std::endl;
-std::cout << gameset.size() << std::endl;
+std::cout << count << "\n";
+std::cout << gameset.size() << "\n";
 */
