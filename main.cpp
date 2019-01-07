@@ -8,7 +8,7 @@
 #include <stack>
 #include <array>
 
-#include <boost\variant.hpp>
+#include <boost/variant.hpp>
 
 
 // how manys ones, two, three, fours, fives, and sixes is what we keep.  note offset by one.
