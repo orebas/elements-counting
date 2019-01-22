@@ -10,6 +10,7 @@
 #include <array>
 #include <cstdio>
 #include <cassert>
+#include <random>
 
 template <typename T>
 std::ostream& operator<< (std::ostream& out, const std::vector<T>& v) {
@@ -82,8 +83,6 @@ public:
 	}
 		smallmovestack move_list() {
 			smallmovestack ret_move_list;
-			if (sums[nextplayer] <= pilesum)
-				ret_move_list.push_back(move_type::knock);
 			for (int i = 0; i < 6; i++)
 				if (hidden[nextplayer][i] > 0)
 					ret_move_list.push_back(static_cast<move_type>(i + 1));
@@ -91,6 +90,9 @@ public:
 				ret_move_list.push_back(move_type::dropsix);
 			if (pilesum > 0)
 				ret_move_list.push_back(move_type::take);
+			if (sums[nextplayer] <= pilesum)
+				ret_move_list.push_back(move_type::knock);
+			
 			//  move_list.push(move_type::fold);
 			return ret_move_list;
 
@@ -203,10 +205,12 @@ public:
 			auto my_move_list = this->move_list();
 			for (auto m : my_move_list) {
 				int i = move(m);
-				if (i)
-					enumerate_games_recurse();
+				//display();
+				if (m == move_type::knock || m == move_type::fold)
+					//std::cout << "GAME IS DONE: " << i << "\n";
+					assert(1);
 				else
-					display();
+					enumerate_games_recurse();
 				unmove();
 			}
 }
@@ -218,9 +222,6 @@ public:
 
 
 void count_hand_possibilities();
-
-
-
 
 template <typename T>
 std::ostream& operator<< (std::ostream& out, const std::array<T,6>& v) {
@@ -327,6 +328,10 @@ int enumerate_games(const handpair& init) {
 
 
 int main(){
+
+	std::random_device rd;
+	std::mt19937 g(rd());
+
   std::ios_base::sync_with_stdio(false);
   std::vector<int> deck = {1,1,2,2,3,3,4,4,5,5,6,6,6,6,6,6} ;
   // std::cout << deck;
@@ -339,6 +344,7 @@ int main(){
   count_hand_possibilities();
   std::vector<handpair> gamelist;
   std::cout << "Here is the count of initial games:  " << count_initial_games(gamelist) << "\n";
+  std::random_shuffle(gamelist.begin(), gamelist.end());
   for(auto x: gamelist) {
 	  int t=0;
 	  game g(x);
