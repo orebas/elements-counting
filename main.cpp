@@ -76,17 +76,18 @@ public:
 		}
 	}
 		const smallmovestack& move_list() {
-			smallmovestack move_list;
+			smallmovestack ret_move_list;
 			if (sums[nextplayer] <= pilesum)
-				move_list.push_back(move_type::knock);
+				ret_move_list.push_back(move_type::knock);
 			for (int i = 0; i < 6; i++)
 				if (hidden[nextplayer][i] > 0)
-					move_list.push_back(static_cast<move_type>(i + 1));
+					ret_move_list.push_back(static_cast<move_type>(i + 1));
 			if (hidden[nextplayer][5] > 0)
-				move_list.push_back(move_type::dropsix);
+				ret_move_list.push_back(move_type::dropsix);
 			if (pilesum > 0)
-				move_list.push_back(move_type::take);
+				ret_move_list.push_back(move_type::take);
 			//  move_list.push(move_type::fold);
+			return ret_move_list;
 
 		}
 		int move(move_type m) { //returns 0 if game continues, 1 if p0 wins, -1 if p1 wins
@@ -148,7 +149,7 @@ public:
 			std::cout << "Player 1:   H" << hidden[0] << "  S" << shown[0] << "\n";
 			std::cout << "Player 2:   H" << hidden[1] << "  S" << shown[1] << "\n";
 			std::cout << "Pile:        " << pile << "\n";
-			std::cout << "History:     " << history << "\n";
+			//std::cout << "History:     " << history << "\n";  //This won't work until the enum operator<< is overloaded.
 			std::cout << "Sum1:  " << sums[0] << "  Sum2" << sums[1] << "  Pile sum: " << pilesum << "\n";
 		}
 		void unmove() {
@@ -194,7 +195,7 @@ public:
 
 		}
 		void enumerate_games_recurse() {
-			auto move_list = this->move_list();
+			auto my_move_list = this->move_list();
 }
 
 
