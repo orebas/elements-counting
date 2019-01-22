@@ -46,6 +46,11 @@ enum class move_type : unsigned int {
 	fold = 9
 };
 
+std::ostream& operator<< (std::ostream& out, const move_type  m) {
+	out << static_cast<int> (m);
+	return out;
+}
+
 
 // how manys ones, two, three, fours, fives, and sixes is what we keep.  note offset by one.
 typedef int card;
@@ -75,7 +80,7 @@ public:
 			}
 		}
 	}
-		const smallmovestack& move_list() {
+		smallmovestack move_list() {
 			smallmovestack ret_move_list;
 			if (sums[nextplayer] <= pilesum)
 				ret_move_list.push_back(move_type::knock);
@@ -149,8 +154,8 @@ public:
 			std::cout << "Player 1:   H" << hidden[0] << "  S" << shown[0] << "\n";
 			std::cout << "Player 2:   H" << hidden[1] << "  S" << shown[1] << "\n";
 			std::cout << "Pile:        " << pile << "\n";
-			//std::cout << "History:     " << history << "\n";  //This won't work until the enum operator<< is overloaded.
-			std::cout << "Sum1:  " << sums[0] << "  Sum2" << sums[1] << "  Pile sum: " << pilesum << "\n";
+			std::cout << "History:     " << history << "\n";  //This won't work until the enum operator<< is overloaded.
+			std::cout << "Sum1:  " << sums[0] << "  Sum2:   " << sums[1] << "  Pile sum: " << pilesum << "\n";
 		}
 		void unmove() {
 			move_type m = history.back();  
@@ -196,6 +201,14 @@ public:
 		}
 		void enumerate_games_recurse() {
 			auto my_move_list = this->move_list();
+			for (auto m : my_move_list) {
+				int i = move(m);
+				if (i)
+					enumerate_games_recurse();
+				else
+					display();
+				unmove();
+			}
 }
 
 
@@ -302,6 +315,8 @@ int enumerate_games(const handpair& init) {
 	std::stack<move_type> m;
 	game init_game(init);
 	auto init_move_list = init_game.move_list();
+	std::cout << init_move_list.size() << "\n";
+	std::cout << init_move_list;
 	for (auto m : init_move_list){
 		init_game.move(m);
 		init_game.enumerate_games_recurse();
@@ -329,6 +344,7 @@ int main(){
 	  game g(x);
 	  g.display();
 	  std::cin >> t;
+	  enumerate_games(x);
 	 // std::cout << x.first << x.second << "\n";
   }
   
