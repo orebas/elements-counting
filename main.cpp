@@ -160,6 +160,7 @@ public:
 			std::cout << "Sum1:  " << sums[0] << "  Sum2:   " << sums[1] << "  Pile sum: " << pilesum << "\n";
 		}
 		void unmove() {
+			assert(history.size() > 0);
 			move_type m = history.back();  
 			history.pop_back();
 			switch (m) {
@@ -204,14 +205,16 @@ public:
 		void enumerate_games_recurse() {
 			auto my_move_list = this->move_list();
 			for (auto m : my_move_list) {
-				int i = move(m);
+				
 				//display();
-				if (m == move_type::knock || m == move_type::fold)
-					//std::cout << "GAME IS DONE: " << i << "\n";
-					assert(1);
-				else
+				if (m == move_type::knock || m == move_type::fold) {
+					//std::cout << "G";
+				}
+				else {
+					int i = move(m);
 					enumerate_games_recurse();
-				unmove();
+					unmove();
+				}
 			}
 }
 
