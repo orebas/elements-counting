@@ -60,6 +60,9 @@ typedef std::pair<hand, hand> handpair;
 typedef std::vector<card> smallstack;
 typedef std::vector<move_type> smallmovestack;
 
+
+//The things below referred to as "Stacks" are actually vectors, and use the vector API.  we may change that.
+
 class game {
 	hand hidden[2];
 	hand shown[2];
@@ -92,8 +95,7 @@ public:
 				ret_move_list.push_back(move_type::take);
 			if (sums[nextplayer] <= pilesum)
 				ret_move_list.push_back(move_type::knock);
-			
-			//  move_list.push(move_type::fold);
+			ret_move_list.push_back(move_type::fold);
 			return ret_move_list;
 
 		}
@@ -108,7 +110,11 @@ public:
 					else return nextplayer * -2 + 1;
 
 				}
-				else assert(0); //shouldn't be able to knock
+				else {
+				  std::cout << "Got an error" << nextplayer <<"  " << " " << sums << " " << pilesum << "\n";
+				  display();
+				  assert(0); //shouldn't be able to knock
+				}
 				history.push_back(m);
 				break;
 			case move_type::one:
@@ -201,7 +207,8 @@ public:
 
 
 		}
-		void enumerate_games_recurse() {
+  void enumerate_games_recurse( int depth) {
+		  std::cout << depth;
 			auto my_move_list = this->move_list();
 			for (auto m : my_move_list) {
 				int i = move(m);
@@ -210,7 +217,7 @@ public:
 					//std::cout << "GAME IS DONE: " << i << "\n";
 					assert(1);
 				else
-					enumerate_games_recurse();
+					enumerate_games_recurse(depth+1);
 				unmove();
 			}
 }
@@ -320,7 +327,7 @@ int enumerate_games(const handpair& init) {
 	std::cout << init_move_list;
 	for (auto m : init_move_list){
 		init_game.move(m);
-		init_game.enumerate_games_recurse();
+		init_game.enumerate_games_recurse(1);
 		init_game.unmove();
 	 }
 	return 0;
