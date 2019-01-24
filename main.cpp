@@ -34,6 +34,18 @@ std::ostream& operator<< (std::ostream& out, const std::array<T, n>& v) {
 }
 
 
+template <typename T, typename U>
+std::ostream& operator<< (std::ostream& out, const std::pair<T, U>& v) {
+	if (!v.empty()) {
+		out << '[';
+		out << v.first << ", " v.second;
+		out << "\b\b]";
+	}
+	return out;
+}
+
+
+
 enum class move_type : unsigned int {
 	knock = 0,
 	one = 1,
@@ -55,7 +67,7 @@ std::ostream& operator<< (std::ostream& out, const move_type  m) {
 
 // how manys ones, two, three, fours, fives, and sixes is what we keep.  note offset by one.
 typedef int card;
-typedef std::array<card,6> hand;
+typedef std::array<card, 6> hand;
 typedef std::pair<hand, hand> handpair;
 typedef std::vector<card> smallstack;
 typedef std::vector<move_type> smallmovestack;
@@ -71,9 +83,9 @@ class game {
 	smallstack pile;
 	smallstack drawstack;
 	smallmovestack history;
-	int nextplayer=0;
-public: 
-		game(const handpair& h) {
+	int nextplayer = 0;
+public:
+	game(const handpair& h) {
 		hidden[0] = h.first;
 		hidden[1] = h.second;
 		shown[0] = { 0,0,0,0,0,0 };
@@ -84,156 +96,167 @@ public:
 			}
 		}
 	}
-		smallmovestack move_list() {
-			smallmovestack ret_move_list;
-			for (int i = 0; i < 6; i++)
-				if (hidden[nextplayer][i] > 0)
-					ret_move_list.push_back(static_cast<move_type>(i + 1));
-			if (hidden[nextplayer][5] > 0)
-				ret_move_list.push_back(move_type::dropsix);
-			if (pilesum > 0)
-				ret_move_list.push_back(move_type::take);
-			if (sums[nextplayer] <= pilesum)
-				ret_move_list.push_back(move_type::knock);
+	smallmovestack move_list() {
+		smallmovestack ret_move_list;
+		for (int i = 0; i < 6; i++)
+			if (hidden[nextplayer][i] > 0)
+				ret_move_list.push_back(static_cast<move_type>(i + 1));
+		if (hidden[nextplayer][5] > 0)
+			ret_move_list.push_back(move_type::dropsix);
+		if (pilesum > 0)
+			ret_move_list.push_back(move_type::take);
+		if (sums[nextplayer] <= pilesum)
+			ret_move_list.push_back(move_type::knock);
+		if (ret_move_list.size() == 0) {
+			//std::cout << "There were no moves, so we added FOLD\n";
+
 			ret_move_list.push_back(move_type::fold);
-			return ret_move_list;
-
 		}
-		int move(move_type m) { //returns 0 if game continues, 1 if p0 wins, -1 if p1 wins
-			switch (m) {
-			case move_type::knock:
-				if (sums[nextplayer] <= pilesum) {
-					if(sums[1-nextplayer] > pilesum)
-						return nextplayer * -2 + 1;
-					else if (sums[1-nextplayer] >= sums[nextplayer])
-						return nextplayer * 2 -1;
-					else return nextplayer * -2 + 1;
+		return ret_move_list;
 
-				}
-				else {
-				  std::cout << "Got an error" << nextplayer <<"  " << " " << sums << " " << pilesum << "\n";
-				  display();
-				  assert(0); //shouldn't be able to knock
-				}
-				history.push_back(m);
-				break;
-			case move_type::one:
-			case move_type::two:
-			case move_type::three:
-			case move_type::four:
-			case move_type::five:
-			case move_type::six: {
-				card p = static_cast<int> (m);
-				assert(hidden[nextplayer][p - 1] > 0);
-				hidden[nextplayer][p - 1]--;
-				pile.push_back(p);
-				sums[nextplayer] -= p;
-				pilesum += p;
-				nextplayer = 1 - nextplayer;
-				history.push_back(m);
+	}
+	int move(move_type m) { //returns 0 if game continues, 1 if p0 wins, -1 if p1 wins
+		switch (m) {
+		case move_type::knock:
+			history.push_back(m);
+			if (sums[nextplayer] <= pilesum) {
+				if (sums[1 - nextplayer] > pilesum)
+					return nextplayer * -2 + 1;
+				else if (sums[1 - nextplayer] >= sums[nextplayer])
+					return nextplayer * 2 - 1;
+				else return nextplayer * -2 + 1;
 			}
-				break;
-			case move_type::dropsix:
-				assert(hidden[nextplayer][5] > 0);
-				hidden[nextplayer][5] --;
-				sums[nextplayer] -= 6;
-				nextplayer = 1 - nextplayer;
-				history.push_back(m);
-				break;
-			case move_type::take: {
-				assert(pilesum > 0);
-				card c = pile.back();
-				pile.pop_back();
-				shown[nextplayer][c - 1]++;
-				sums[nextplayer] += c;
-				pilesum -= c;
-				nextplayer = 1 - nextplayer;
-				history.push_back(m);
-				drawstack.push_back(c);
+			else {
+				std::cout << "Got an error" << nextplayer << "  " << " " << sums << " " << pilesum << "\n";
+				display();
+				assert(0); //shouldn't be able to knock
 			}
-				break;
-			case move_type::fold:
-				return nextplayer * 2 - 1;
-				break;
-			}
+
+			break;
+		case move_type::one:
+		case move_type::two:
+		case move_type::three:
+		case move_type::four:
+		case move_type::five:
+		case move_type::six: {
+			card p = static_cast<int> (m);
+			assert(hidden[nextplayer][p - 1] > 0);
+			hidden[nextplayer][p - 1]--;
+			pile.push_back(p);
+			sums[nextplayer] -= p;
+			pilesum += p;
+			nextplayer = 1 - nextplayer;
+			history.push_back(m);
+		}
+							 break;
+		case move_type::dropsix:
+			assert(hidden[nextplayer][5] > 0);
+			hidden[nextplayer][5] --;
+			sums[nextplayer] -= 6;
+			nextplayer = 1 - nextplayer;
+			history.push_back(m);
+			break;
+		case move_type::take: {
+			assert(pilesum > 0);
+			card c = pile.back();
+			pile.pop_back();
+			shown[nextplayer][c - 1]++;
+			sums[nextplayer] += c;
+			pilesum -= c;
+			nextplayer = 1 - nextplayer;
+			history.push_back(m);
+			drawstack.push_back(c);
+		}
+							  break;
+		case move_type::fold:
+			history.push_back(m);
+			return nextplayer * 2 - 1;
+			break;
+		}
+		return 0;
+	}
+	void display() {
+		std::cout << "Player 1:   H" << hidden[0] << "  S" << shown[0] << "\n";
+		std::cout << "Player 2:   H" << hidden[1] << "  S" << shown[1] << "\n";
+		std::cout << "Pile:        " << pile << "\n";
+		std::cout << "History:     " << history << "\n";  //This won't work until the enum operator<< is overloaded.
+		std::cout << "Sum1:  " << sums[0] << "  Sum2:   " << sums[1] << "  Pile sum: " << pilesum << "\n";
+	}
+	void unmove() {
+		assert(history.size() > 0);
+		move_type m = history.back();
+		history.pop_back();
+		switch (m) {
+		case move_type::knock:
+			break;
+		case move_type::one:
+		case move_type::two:
+		case move_type::three:
+		case move_type::four:
+		case move_type::five:
+		case move_type::six: {
+			card p = static_cast<int> (m);
+			assert(pile.back() == p);
+			nextplayer = 1 - nextplayer;
+			sums[nextplayer] += p;
+			pilesum -= p;
+			hidden[nextplayer][p - 1]++;
+			pile.pop_back();
+		}
+							 break;
+		case move_type::dropsix:
+			nextplayer = 1 - nextplayer;
+			hidden[nextplayer][5] ++;
+			sums[nextplayer] += 6;
+			break;
+		case move_type::take: {
+			card c = drawstack.back();
+			nextplayer = 1 - nextplayer;
+			pile.push_back(c);
+			shown[nextplayer][c - 1]--;
+			sums[nextplayer] -= c;
+			pilesum += c;
+			drawstack.pop_back();
+		}
+							  break;
+		case move_type::fold:
+			break;
+		}
+
+
+	}
+	int enumerate_games_recurse(int depth) {
+		static int maxprint = 0;
+		auto my_move_list = this->move_list();
+
+		auto rng = std::default_random_engine{};
+		std::shuffle(my_move_list.begin(), my_move_list.end(), rng);
+		//std::cout << depth << " ";
+		//display();
+		//std::cout << my_move_list;
+		//int j;
+		//std::cin >> j;
+		maxprint += my_move_list.size();
+		if (maxprint > 10000)
 			return 0;
-		}
-		void display() {
-			std::cout << "Player 1:   H" << hidden[0] << "  S" << shown[0] << "\n";
-			std::cout << "Player 2:   H" << hidden[1] << "  S" << shown[1] << "\n";
-			std::cout << "Pile:        " << pile << "\n";
-			std::cout << "History:     " << history << "\n";  //This won't work until the enum operator<< is overloaded.
-			std::cout << "Sum1:  " << sums[0] << "  Sum2:   " << sums[1] << "  Pile sum: " << pilesum << "\n";
-		}
-		void unmove() {
-			assert(history.size() > 0);
-			move_type m = history.back();  
-			history.pop_back();
-			switch (m) {
-			case move_type::knock:
-				break;
-			case move_type::one:
-			case move_type::two:
-			case move_type::three:
-			case move_type::four:
-			case move_type::five:
-			case move_type::six: {
-				card p = static_cast<int> (m);
-				assert(pile.back() == p);
-				nextplayer = 1 - nextplayer;
-				sums[nextplayer] += p;
-				pilesum -= p;
-				hidden[nextplayer][p - 1]++;
-				pile.pop_back();
-			}
-			break;
-			case move_type::dropsix:
-				nextplayer = 1 - nextplayer;
-				hidden[nextplayer][5] ++;
-				sums[nextplayer] += 6;
-				break;
-			case move_type::take: {
-				card c = drawstack.back();
-				nextplayer = 1 - nextplayer;
-				pile.push_back(c);
-				shown[nextplayer][c - 1]--;
-				sums[nextplayer] -= c;
-				pilesum += c;
-				drawstack.pop_back();
-			}
-			break;
-			case move_type::fold:
-				break;
-			}
+		for (auto m : my_move_list) {
 
-
-		}
-  void enumerate_games_recurse( int depth) {
-		  std::cout << depth;
-			auto my_move_list = this->move_list();
-			for (auto m : my_move_list) {
-				
-				//display();
-<<<<<<< HEAD
-				if (m == move_type::knock || m == move_type::fold)
-					//std::cout << "GAME IS DONE: " << i << "\n";
-					assert(1);
-				else
-					enumerate_games_recurse(depth+1);
+			if (m == move_type::knock || m == move_type::fold) {
+				//std::cout << "HISTORY SIZE" << history.size() << history;
+								//std::cout << "DONE: " << "\n";
+				std::cout << history << "\n";
+			}
+			else {
+				move(m);
+				enumerate_games_recurse(depth + 1);
 				unmove();
-=======
-				if (m == move_type::knock || m == move_type::fold) {
-					//std::cout << "G";
-				}
-				else {
-					int i = move(m);
-					enumerate_games_recurse();
-					unmove();
-				}
->>>>>>> 3bb7c991e4a4fe31fedfa7261bb2a90bc23c6168
 			}
-}
 
+
+		}
+		return 0;
+	}
+	
 
 
 };
@@ -243,7 +266,7 @@ public:
 void count_hand_possibilities();
 
 template <typename T>
-std::ostream& operator<< (std::ostream& out, const std::array<T,6>& v) {
+std::ostream& operator<< (std::ostream& out, const std::array<T, 6>& v) {
 	if (!v.empty()) {
 		out << '[';
 		std::copy(v.begin(), v.end(), std::ostream_iterator<T>(out, ", "));
@@ -316,8 +339,8 @@ int  count_initial_games(std::vector<handpair> &  gamelist) {
 							for (auto x : counter)
 								sum += x;
 							if (sum == 6) {
-								
-								int c = count_games_restricted(counter,gamelist);
+
+								int c = count_games_restricted(counter, gamelist);
 								games += c;
 							}
 						}
@@ -335,47 +358,47 @@ int enumerate_games(const handpair& init) {
 	std::stack<move_type> m;
 	game init_game(init);
 	auto init_move_list = init_game.move_list();
-	std::cout << init_move_list.size() << "\n";
-	std::cout << init_move_list;
-	for (auto m : init_move_list){
+	//std::cout << init_move_list.size() << "\n";
+	//std::cout << init_move_list;
+	for (auto m : init_move_list) {
 		init_game.move(m);
 		init_game.enumerate_games_recurse(1);
 		init_game.unmove();
-	 }
+	}
 	return 0;
 }
 
 
-int main(){
+int main() {
 
 	std::random_device rd;
 	std::mt19937 g(rd());
 
-  std::ios_base::sync_with_stdio(false);
-  std::vector<int> deck = {1,1,2,2,3,3,4,4,5,5,6,6,6,6,6,6} ;
-  // std::cout << deck;
-  
-  std::sort(deck.begin(), deck.end());
-  std::cout << "Here is the count of permutations" << "\n";
-  long long count =0;
-  std::set< std::pair<std::vector<int>, std::vector<int> >> gameset;
-  
-  count_hand_possibilities();
-  std::vector<handpair> gamelist;
-  std::cout << "Here is the count of initial games:  " << count_initial_games(gamelist) << "\n";
-  std::random_shuffle(gamelist.begin(), gamelist.end());
-  for(auto x: gamelist) {
-	  int t=0;
-	  game g(x);
-	  g.display();
-	  std::cin >> t;
-	  enumerate_games(x);
-	 // std::cout << x.first << x.second << "\n";
-  }
-  
-  
-  int dummy = 0;
-  std::cin >> dummy;
+	std::ios_base::sync_with_stdio(false);
+	std::vector<int> deck = { 1,1,2,2,3,3,4,4,5,5,6,6,6,6,6,6 };
+	// std::cout << deck;
+
+	std::sort(deck.begin(), deck.end());
+	// std::cout << "Here is the count of permutations" << "\n";
+	long long count = 0;
+	std::set< std::pair<std::vector<int>, std::vector<int> >> gameset;
+
+	//count_hand_possibilities();
+	std::vector<handpair> gamelist;
+	int init_game_count = count_initial_games(gamelist);
+	//std::cout << "Here is the count of initial games:  " << init_game_count << "\n";
+	std::random_shuffle(gamelist.begin(), gamelist.end());
+	{
+		game g(gamelist.front());
+		g.display();
+		enumerate_games(gamelist.front());
+		// std::cout << x.first << x.second << "\n";
+	}
+
+
+
+	int dummy = 0;
+	//std::cin >> dummy;
 }
 
 
