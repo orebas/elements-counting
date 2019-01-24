@@ -38,7 +38,7 @@ template <typename T, typename U>
 std::ostream& operator<< (std::ostream& out, const std::pair<T, U>& v) {
 	if (!v.empty()) {
 		out << '[';
-		out << v.first << ", " v.second;
+		out << v.first << ", " << v.second;
 		out << "\b\b]";
 	}
 	return out;
