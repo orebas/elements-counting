@@ -16,8 +16,8 @@ template <typename T>
 std::ostream& operator<< (std::ostream& out, const std::vector<T>& v) {
 	if (!v.empty()) {
 		out << '[';
-		std::copy(v.begin(), v.end(), std::ostream_iterator<T>(out, ", "));
-		out << "\b\b]";
+		std::copy(v.begin(), v.end(), std::ostream_iterator<T>(out, ""));
+		out << "]";
 	}
 	return out;
 }
@@ -237,14 +237,14 @@ public:
 		//int j;
 		//std::cin >> j;
 		maxprint += my_move_list.size();
-		if (maxprint > 10000)
+		if (maxprint > 1000000000000)
 			return 0;
 		for (auto m : my_move_list) {
 
 			if (m == move_type::knock || m == move_type::fold) {
 				//std::cout << "HISTORY SIZE" << history.size() << history;
 								//std::cout << "DONE: " << "\n";
-				std::cout << history << "\n";
+			  std::cout << history << "\n";
 			}
 			else {
 				move(m);
