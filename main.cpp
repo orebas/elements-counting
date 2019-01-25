@@ -132,7 +132,29 @@ int  count_initial_games(std::vector<handpair> &  gamelist) {
 }
 
 
+/* This function will
+-play a random game to completion, and display
+-until complete, unplay moves one at a time, display, and count games from that node
+ */
 
+void estimate_games (const handpair& init) {
+
+  std::random_device rd;
+  std::mt19937 rand_gen(rd());
+
+
+  game init_game(init);
+  int more_moves=1;
+  do {
+    auto init_move_list = init_game.move_list();
+    
+    std::shuffle(init_move_list.begin(), init_move_list.end(), rand_gen);
+    for(int t=0; t<20; t++)
+      if ((init_move_list[0] == move_type::fold) || (init_move_list[0] == move_type::knock))
+	std::shuffle(init_move_list.begin(), init_move_list.end(), rand_gen);
+     
+
+  } while(more_moves != 0);
 
 
 
