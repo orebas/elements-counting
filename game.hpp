@@ -48,7 +48,25 @@ enum class move_type : unsigned int {
 };
 
 std::ostream& operator<< (std::ostream& out, const move_type  m) {
-	out << static_cast<int> (m);
+	int i = static_cast<int> (m);
+	switch (m) {
+	case 0:
+		out << "K"; // knock
+		break;
+	case 7:
+		out << "D"; //drop a six
+		break;
+	case 8 :
+		out << "T"; // take
+		break;
+	case 9 :
+		out << "F"; // fold
+		break;
+	default:
+		out << i;
+		break;
+	};
+	//out << static_cast<int> (m);
 	return out;
 }
 

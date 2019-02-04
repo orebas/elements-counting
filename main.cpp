@@ -14,6 +14,7 @@
 #include "game.hpp"
 
 void count_hand_possibilities();
+void estimate_games(const handpair& init);
 
 template <typename T>
 std::ostream& operator<< (std::ostream& out, const std::array<T, 6>& v) {
@@ -44,18 +45,21 @@ int main() {
 	std::vector<handpair> gamelist;
 	int init_game_count = count_initial_games(gamelist);
 	//std::cout << "Here is the count of initial games:  " << init_game_count << "\n";
+	
 	std::random_shuffle(gamelist.begin(), gamelist.end());
 	{
 		game g(gamelist.front());
 		g.display();
-		enumerate_games(gamelist.front());
+		estimate_games(gamelist.front());
+
+		//enumerate_games(gamelist.front());
 		// std::cout << x.first << x.second << "\n";
 	}
 
 
 
 	int dummy = 0;
-	//std::cin >> dummy;
+	std::cin >> dummy;
 }
 
 
@@ -137,25 +141,29 @@ int  count_initial_games(std::vector<handpair> &  gamelist) {
 -until complete, unplay moves one at a time, display, and count games from that node
  */
 
-void estimate_games (const handpair& init) {
+void estimate_games(const handpair& init) {
 
-  std::random_device rd;
-  std::mt19937 rand_gen(rd());
+	std::random_device rd;
+	std::mt19937 rand_gen(rd());
 
 
-  game init_game(init);
-  int more_moves=1;
-  do {
-    auto init_move_list = init_game.move_list();
-    
-    std::shuffle(init_move_list.begin(), init_move_list.end(), rand_gen);
-    for(int t=0; t<20; t++)
-      if ((init_move_list[0] == move_type::fold) || (init_move_list[0] == move_type::knock))
-	std::shuffle(init_move_list.begin(), init_move_list.end(), rand_gen);
-     
+	game init_game(init);
+	int more_moves = 1;
+	do {
+		auto init_move_list = init_game.move_list();
 
-  } while(more_moves != 0);
-
+		std::shuffle(init_move_list.begin(), init_move_list.end(), rand_gen);
+		for (int t = 0; t < 20; t++)
+			if ((init_move_list[0] == move_type::fold) )
+				std::shuffle(init_move_list.begin(), init_move_list.end(), rand_gen);
+		auto m = init_move_list[0];
+		init_game.move(m);
+		if (m == move_type::fold || m == move_type::knock)
+			more_moves = 0;
+		init_game.display();
+	} while (more_moves != 0);
+	init_game.display();
+}
 
 
 int enumerate_games(const handpair& init) {
